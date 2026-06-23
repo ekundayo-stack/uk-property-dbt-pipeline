@@ -1,17 +1,22 @@
 # UK Property Price Pipeline (dbt + DuckDB)
 
-An analytics-engineering pipeline that transforms ~880,000 UK property
-sale records from HM Land Registry into clean, tested, business-ready
-tables using dbt and DuckDB.
+An analytics-engineering pipeline that transforms six years of UK property
+sale records from HM Land Registry into a clean, tested dimensional model
+using dbt and DuckDB.
 
 ## What it does
 
-Raw Land Registry "Price Paid" data (one year, 879,386 transactions)
-flows through three layers:
+Raw Land Registry "Price Paid" data (2020 to 2025, 5.9 million
+transactions) flows through three layers:
 
-- **Source** — the raw yearly CSV, declared as a dbt source
+- **Source** — six yearly CSVs, read together via a wildcard and declared
+  as a single dbt source
 - **Staging** (`stg_price_paid`) — columns renamed and typed, light cleaning
-- **Marts** — business-ready aggregates:
+- **Marts** — a dimensional model plus business-ready aggregates:
+  - `fct_sales` — sales fact table, one row per transaction, joined to its
+    property type dimension
+  - `dim_property_type` — property type dimension, mapping Land Registry
+    codes to readable labels
   - `avg_price_by_county` — average and median sale price by region
   - `monthly_sales_trend` — sales volume and average price by month
 
@@ -19,11 +24,21 @@ flows through three layers:
 
 ![Lineage Graph](images/lineage_graph.png)
 
+The graph shows a star schema: raw data cleaned once in staging, then
+modelled into a fact table that references its dimension, alongside two
+aggregate marts.
+
 ## Data quality
 
-Six dbt tests run on every build: uniqueness and not-null on the
-transaction key, not-null on price and date, and accepted-values checks
-on the property type and old/new fields. All passing across all records.
+Fourteen dbt tests run on every build, including:
+
+- uniqueness and not-null on transaction keys
+- not-null on price and date
+- accepted-values checks on property type and old/new fields
+- a relationships test confirming every sale links to a valid property
+  type (referential integrity across the full dataset)
+
+All tests passing across all records.
 
 ## Tech stack
 
@@ -31,9 +46,10 @@ dbt Core, dbt-duckdb, DuckDB.
 
 ## Running it locally
 
-1. Download a yearly Price Paid CSV from
+1. Download one or more yearly Price Paid CSVs from
    https://www.gov.uk/guidance/about-the-price-paid-data
-2. Place it in a `data/` folder (the file is gitignored due to size).
+2. Place them in a `data/` folder, named `pp-YYYY.csv` (the files are
+   gitignored due to size).
 3. Update the `external_location` path in `models/staging/_sources.yml`
-   to point to your CSV.
+   to point to your `data/` folder.
 4. Run `dbt run` to build, then `dbt test` to validate.

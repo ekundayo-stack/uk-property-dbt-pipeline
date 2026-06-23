@@ -5,6 +5,6 @@ sources:
     description: "Raw HM Land Registry Price Paid Data, read directly from a yearly CSV."
     tables:
       - name: price_paid
-        description: "One row per residential property sale in England and Wales, 2025."
+        description: "One row per residential property sale in England and Wales, 2020 to 2025."
         meta:
-          external_location: "C:/Users/asus/projects/The_Bear/the_bear/data/pp-2025.csv"
+          external_location: "C:/Users/asus/projects/The_Bear/the_bear/data/pp-*.csv"

@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: dim_property_type
+    description: "Property type dimension. Maps Land Registry codes to readable labels."
+    columns:
+      - name: property_type_code
+        description: "Single-letter Land Registry property type code."
+        data_tests:
+          - not_null
+          - unique
+      - name: property_type_name
+        description: "Human-readable property type label."
+        data_tests:
+          - not_null
+
+  - name: fct_sales
+    description: "Sales fact table. One row per property transaction, 2020 to 2025."
+    columns:
+      - name: transaction_id
+        description: "Unique identifier for each property transaction."
+        data_tests:
+          - not_null
+          - unique
+      - name: price
+        description: "Sale price in GBP."
+        data_tests:
+          - not_null
+      - name: property_type_code
+        description: "Foreign key to dim_property_type."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_property_type')
+                field: property_type_code

@@ -53,3 +53,22 @@ dbt Core, dbt-duckdb, DuckDB.
 3. Update the `external_location` path in `models/staging/_sources.yml`
    to point to your `data/` folder.
 4. Run `dbt run` to build, then `dbt test` to validate.
+
+
+## AI Report Generator
+
+On top of the pipeline, an AI layer (in `ai_reporting/`) generates written
+property market briefings from the modelled data using Google's Gemini API.
+
+The interesting engineering is the guardrails against hallucination:
+
+- A strict system prompt constrains the model to use only the real figures
+  it is given, and forbids it from describing recorded data as forecasts.
+- After generation, an automated verification step extracts every number
+  from the AI's output and checks it against the source data. If the model
+  states any figure not present in the pipeline, the report is flagged and
+  refused.
+- Reports are only saved if verification passes. A verified report or none.
+
+Run `dbt run` first to build the data, then:
+`python ai_reporting/generate_report.py "London"` (or any region).

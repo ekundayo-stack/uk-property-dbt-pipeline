@@ -5,3 +5,9 @@ logs/
 data/
 venv/
 __pycache__/
+*.csv
+explore.py
+export_for_tableau.py
+.env
+property_report_*.md
+report_*.md
